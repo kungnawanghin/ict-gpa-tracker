@@ -1,45 +1,67 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { courses } from "@/data/courses";
 import SemesterCard from "@/components/SemesterCard";
-import { Grade } from "@/types/course";
+import { Course, Grade } from "@/types/course";
 import {
   calculateSemesterGPA,
   calculateCumulativeGPAUntil,
 } from "@/utils/gpa";
 import { getPerformance } from "@/utils/performance";
 import GPAChart from "@/components/GPAChart";
+import { getCourses } from "@/lib/courses";
 
 export default function Home() {
   const [grades, setGrades] = useState<
-  Record<string, Grade | undefined>
->({});
+    Record<string, Grade | undefined>
+  >({});
 
-const [hasLoaded, setHasLoaded] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
-useEffect(() => {
-  const savedGrades = localStorage.getItem(
-    "ict-gpa-grades"
-  );
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
 
-  if (savedGrades) {
-    setGrades(JSON.parse(savedGrades));
-  }
+  // Load courses from Supabase
+  useEffect(() => {
+    async function loadCourses() {
+      try {
+        const data = await getCourses();
 
-  setHasLoaded(true);
-}, []);
+        setCourses(data);
+      } catch (error) {
+        console.error("Failed to load courses:", error);
+      } finally {
+        setCoursesLoading(false);
+      }
+    }
 
-useEffect(() => {
-  if (!hasLoaded) {
-    return;
-  }
+    loadCourses();
+  }, []);
 
-  localStorage.setItem(
-    "ict-gpa-grades",
-    JSON.stringify(grades)
-  );
-}, [grades, hasLoaded]);
+  // Load saved grades
+  useEffect(() => {
+    const savedGrades = localStorage.getItem(
+      "ict-gpa-grades"
+    );
+
+    if (savedGrades) {
+      setGrades(JSON.parse(savedGrades));
+    }
+
+    setHasLoaded(true);
+  }, []);
+
+  // Save grades
+  useEffect(() => {
+    if (!hasLoaded) {
+      return;
+    }
+
+    localStorage.setItem(
+      "ict-gpa-grades",
+      JSON.stringify(grades)
+    );
+  }, [grades, hasLoaded]);
 
   function handleGradeChange(
     code: string,
@@ -52,17 +74,28 @@ useEffect(() => {
   }
 
   function handleResetGrades() {
-  const confirmed = window.confirm(
-    "Are you sure you want to reset all grades?"
-  );
+    const confirmed = window.confirm(
+      "Are you sure you want to reset all grades?"
+    );
 
-  if (!confirmed) {
-    return;
+    if (!confirmed) {
+      return;
+    }
+
+    setGrades({});
+    localStorage.removeItem("ict-gpa-grades");
   }
 
-  setGrades({});
-  localStorage.removeItem("ict-gpa-grades");
-}
+  // Show loading screen while courses are loading
+  if (coursesLoading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50">
+        <p className="text-slate-500">
+          Loading courses...
+        </p>
+      </main>
+    );
+  }
 
   const semester1 = courses.filter(
     (course) =>
@@ -128,43 +161,47 @@ useEffect(() => {
       : getPerformance(cumulativeGPA);
 
   const gpaChartData = terms.map((term) => {
-  const semesterGPA = calculateSemesterGPA(
-    term.courses,
-    grades
-  );
-
-  const cumulativeGPA =
-    calculateCumulativeGPAUntil(
-      courses,
-      grades,
-      term.year,
-      term.semester
+    const semesterGPA = calculateSemesterGPA(
+      term.courses,
+      grades
     );
 
-  const gradedCredits = term.courses
-    .filter(
-      (course) =>
-        course.countsForGPA &&
-        grades[course.code] !== undefined
-    )
-    .reduce(
-      (total, course) =>
-        total + course.credits,
-      0
-    );
+    const cumulativeGPA =
+      calculateCumulativeGPAUntil(
+        courses,
+        grades,
+        term.year,
+        term.semester
+      );
 
-  return {
-    term: term.title.replace("2025 ", "").replace("2026 ", ""),
-    semesterGPA:
-      gradedCredits === 0
-        ? null
-        : Number(semesterGPA.toFixed(2)),
-    cumulativeGPA:
-      cumulativeGPA === 0
-        ? null
-        : Number(cumulativeGPA.toFixed(2)),
-  };
-});
+    const gradedCredits = term.courses
+      .filter(
+        (course) =>
+          course.countsForGPA &&
+          grades[course.code] !== undefined
+      )
+      .reduce(
+        (total, course) =>
+          total + course.credits,
+        0
+      );
+
+    return {
+      term: term.title
+        .replace("2025 ", "")
+        .replace("2026 ", ""),
+
+      semesterGPA:
+        gradedCredits === 0
+          ? null
+          : Number(semesterGPA.toFixed(2)),
+
+      cumulativeGPA:
+        cumulativeGPA === 0
+          ? null
+          : Number(cumulativeGPA.toFixed(2)),
+    };
+  });
 
   return (
     <main className="min-h-screen bg-slate-50 px-6 py-10">
@@ -206,7 +243,7 @@ useEffect(() => {
             className="mt-6 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
           >
             Reset Grades
-          </button>          
+          </button>
         </section>
 
         {/* GPA History */}

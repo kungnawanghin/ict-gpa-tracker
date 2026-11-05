@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ICT GPA Tracker
 
-## Getting Started
+เว็บไซต์สำหรับช่วยนักศึกษา ICT มหาวิทยาลัยมหิดล ติดตามและคำนวณผลการเรียนของตนเอง
 
-First, run the development server:
+## ฟีเจอร์หลัก
+
+- บันทึกเกรดของแต่ละรายวิชา
+- คำนวณ **SEM-GPA** ของแต่ละภาคการศึกษา
+- คำนวณ **CUM-GPA** สะสม
+- แสดงประวัติผลการเรียนในรูปแบบตาราง
+- แสดงกราฟการเปลี่ยนแปลงของ GPA
+- ระบบ Login และ Logout
+- บันทึกข้อมูลผู้ใช้และเกรดด้วย Supabase
+- ระบบ Admin สำหรับจัดการรายวิชา
+
+## เทคโนโลยีที่ใช้
+
+- **Next.js**
+- **React**
+- **TypeScript**
+- **Tailwind CSS**
+- **Supabase**
+
+## โครงสร้างโปรเจกต์
+
+```text
+src/
+├── app/            # หน้าต่าง ๆ ของเว็บไซต์
+├── components/     # React Components
+├── lib/            # ฟังก์ชันสำหรับคำนวณ GPA และเชื่อมต่อฐานข้อมูล
+└── types/          # TypeScript Types
+```
+
+## การทำงานของระบบ
+
+1. ผู้ใช้เข้าสู่ระบบ
+2. ระบบโหลดรายวิชาจากฐานข้อมูล
+3. ผู้ใช้เลือกเกรดของแต่ละรายวิชา
+4. ระบบบันทึกเกรดลงใน Supabase
+5. ระบบคำนวณ SEM-GPA และ CUM-GPA
+6. ผลลัพธ์จะแสดงในตาราง GPA History และกราฟ
+
+## การติดตั้งและใช้งาน
+
+### 1. Clone โปรเจกต์
+
+```bash
+git clone https://github.com/kungnawanghin/ict-gpa-tracker.git
+```
+
+### 2. เข้าไปยังโฟลเดอร์โปรเจกต์
+
+```bash
+cd ict-gpa-tracker
+```
+
+### 3. ติดตั้ง Dependencies
+
+```bash
+npm install
+```
+
+### 4. ตั้งค่า Environment Variables
+
+สร้างไฟล์ `.env.local` และเพิ่มข้อมูล Supabase ของคุณ
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 5. รันโปรเจกต์
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+จากนั้นเปิดเว็บไซต์ที่
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+http://localhost:3000
+```

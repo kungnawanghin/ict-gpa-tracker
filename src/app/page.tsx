@@ -1,69 +1,64 @@
 "use client";
 
+import UserMenu from "@/components/UserMenu";
 import { useEffect, useState } from "react";
 import SemesterCard from "@/components/SemesterCard";
+import GPAChart from "@/components/GPAChart";
 import { Course, Grade } from "@/types/course";
 import {
   calculateSemesterGPA,
   calculateCumulativeGPAUntil,
-} from "@/utils/gpa";
-import { getPerformance } from "@/utils/performance";
-import GPAChart from "@/components/GPAChart";
+} from "@/lib/gpa";
 import { getCourses } from "@/lib/courses";
+import {
+  getGrades,
+  saveGrade,
+  resetGrades,
+} from "@/lib/grades";
 
 export default function Home() {
+  const [courses, setCourses] = useState<Course[]>([]);
+
   const [grades, setGrades] = useState<
     Record<string, Grade | undefined>
   >({});
 
-  const [hasLoaded, setHasLoaded] = useState(false);
-
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [coursesLoading, setCoursesLoading] = useState(true);
-
-  // Load courses from Supabase
+  // โหลดข้อมูล Courses
   useEffect(() => {
     async function loadCourses() {
       try {
         const data = await getCourses();
-
         setCourses(data);
       } catch (error) {
-        console.error("Failed to load courses:", error);
-      } finally {
-        setCoursesLoading(false);
+        console.error(
+          "Failed to load courses - full error:",
+          error
+        );
       }
     }
 
     loadCourses();
   }, []);
 
-  // Load saved grades
+  // โหลด Grades ของ User ที่ Login อยู่
   useEffect(() => {
-    const savedGrades = localStorage.getItem(
-      "ict-gpa-grades"
-    );
-
-    if (savedGrades) {
-      setGrades(JSON.parse(savedGrades));
+    async function loadGrades() {
+      try {
+        const savedGrades = await getGrades();
+        setGrades(savedGrades);
+      } catch (error) {
+        console.error(
+          "Failed to load grades - full error:",
+          error
+        );
+      }
     }
 
-    setHasLoaded(true);
+    loadGrades();
   }, []);
 
-  // Save grades
-  useEffect(() => {
-    if (!hasLoaded) {
-      return;
-    }
-
-    localStorage.setItem(
-      "ict-gpa-grades",
-      JSON.stringify(grades)
-    );
-  }, [grades, hasLoaded]);
-
-  function handleGradeChange(
+  // เมื่อผู้ใช้เปลี่ยนเกรด
+  async function handleGradeChange(
     code: string,
     grade: Grade | undefined
   ) {
@@ -71,9 +66,19 @@ export default function Home() {
       ...currentGrades,
       [code]: grade,
     }));
+
+    if (grade !== undefined) {
+      try {
+        await saveGrade(code, grade);
+        console.log(`Grade saved: ${code} = ${grade}`);
+      } catch (error) {
+        console.error("Failed to save grade:", error);
+      }
+    }
   }
 
-  function handleResetGrades() {
+  // Reset เกรดทั้งหมด
+  async function handleResetGrades() {
     const confirmed = window.confirm(
       "Are you sure you want to reset all grades?"
     );
@@ -82,21 +87,16 @@ export default function Home() {
       return;
     }
 
-    setGrades({});
-    localStorage.removeItem("ict-gpa-grades");
+    try {
+      await resetGrades();
+      setGrades({});
+      console.log("All grades have been reset");
+    } catch (error) {
+      console.error("Failed to reset grades:", error);
+    }
   }
 
-  // Show loading screen while courses are loading
-  if (coursesLoading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50">
-        <p className="text-slate-500">
-          Loading courses...
-        </p>
-      </main>
-    );
-  }
-
+  // แยกรายวิชาตาม Semester
   const semester1 = courses.filter(
     (course) =>
       course.academicYear === 2025 &&
@@ -121,6 +121,7 @@ export default function Home() {
       course.semester === "1"
   );
 
+  // รวมข้อมูลแต่ละ Semester
   const terms = [
     {
       year: 2025,
@@ -148,6 +149,7 @@ export default function Home() {
     },
   ];
 
+  // คำนวณ CUM-GPA ล่าสุด
   const cumulativeGPA = calculateCumulativeGPAUntil(
     courses,
     grades,
@@ -155,18 +157,14 @@ export default function Home() {
     "1"
   );
 
-  const performance =
-    cumulativeGPA === 0
-      ? "No grades yet"
-      : getPerformance(cumulativeGPA);
-
+  // สร้างข้อมูลสำหรับ GPA Chart
   const gpaChartData = terms.map((term) => {
     const semesterGPA = calculateSemesterGPA(
       term.courses,
       grades
     );
 
-    const cumulativeGPA =
+    const termCumulativeGPA =
       calculateCumulativeGPAUntil(
         courses,
         grades,
@@ -181,25 +179,20 @@ export default function Home() {
           grades[course.code] !== undefined
       )
       .reduce(
-        (total, course) =>
-          total + course.credits,
+        (total, course) => total + course.credits,
         0
       );
 
     return {
-      term: term.title
-        .replace("2025 ", "")
-        .replace("2026 ", ""),
-
+      term: term.title,
       semesterGPA:
         gradedCredits === 0
           ? null
           : Number(semesterGPA.toFixed(2)),
-
       cumulativeGPA:
-        cumulativeGPA === 0
+        gradedCredits === 0
           ? null
-          : Number(cumulativeGPA.toFixed(2)),
+          : Number(termCumulativeGPA.toFixed(2)),
     };
   });
 
@@ -208,17 +201,21 @@ export default function Home() {
       <div className="mx-auto max-w-5xl">
 
         {/* Header */}
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900">
-            ICT GPA Tracker
-          </h1>
+        <header className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight text-slate-900">
+              ICT GPA Tracker
+            </h1>
 
-          <p className="mt-2 text-slate-500">
-            Track your academic performance and GPA progress.
-          </p>
+            <p className="mt-2 text-slate-500">
+              Track your academic performance and GPA progress.
+            </p>
+          </div>
+
+          <UserMenu />
         </header>
 
-        {/* CUM-GPA Card */}
+        {/* CUM-GPA */}
         <section className="mb-8 rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
           <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
             CUM-GPA
@@ -228,13 +225,6 @@ export default function Home() {
             {cumulativeGPA === 0
               ? "—"
               : cumulativeGPA.toFixed(2)}
-          </p>
-
-          <p className="mt-4 text-slate-600">
-            Performance:{" "}
-            <span className="font-semibold text-slate-900">
-              {performance}
-            </span>
           </p>
 
           <button
@@ -256,19 +246,16 @@ export default function Home() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-slate-200">
-                  <th className="px-4 py-3 text-sm font-semibold text-slate-500">
+                  <th className="px-4 py-3">
                     Academic Term
                   </th>
-
-                  <th className="px-4 py-3 text-sm font-semibold text-slate-500">
+                  <th className="px-4 py-3">
                     GPA Credits
                   </th>
-
-                  <th className="px-4 py-3 text-sm font-semibold text-slate-500">
+                  <th className="px-4 py-3">
                     SEM-GPA
                   </th>
-
-                  <th className="px-4 py-3 text-sm font-semibold text-slate-500">
+                  <th className="px-4 py-3">
                     CUM-GPA
                   </th>
                 </tr>
@@ -282,7 +269,7 @@ export default function Home() {
                       grades
                     );
 
-                  const cumulativeGPA =
+                  const termCumulativeGPA =
                     calculateCumulativeGPAUntil(
                       courses,
                       grades,
@@ -295,8 +282,7 @@ export default function Home() {
                       .filter(
                         (course) =>
                           course.countsForGPA &&
-                          grades[course.code] !==
-                            undefined
+                          grades[course.code] !== undefined
                       )
                       .reduce(
                         (total, course) =>
@@ -309,26 +295,28 @@ export default function Home() {
                       key={term.title}
                       className="border-b border-slate-100"
                     >
-                      <td className="px-4 py-4 font-medium text-slate-900">
+                      <td className="px-4 py-4 font-medium">
                         {term.title}
                       </td>
 
-                      <td className="px-4 py-4 text-slate-600">
+                      <td className="px-4 py-4">
                         {gradedCredits === 0
                           ? "—"
                           : gradedCredits}
                       </td>
 
-                      <td className="px-4 py-4 font-semibold text-slate-900">
+                      <td className="px-4 py-4">
                         {gradedCredits === 0
                           ? "—"
                           : semesterGPA.toFixed(2)}
                       </td>
 
-                      <td className="px-4 py-4 font-semibold text-slate-900">
-                        {cumulativeGPA === 0
+                      {/* ถ้า Semester นี้ยังไม่มีเกรด
+                          จะยังไม่แสดง CUM-GPA */}
+                      <td className="px-4 py-4">
+                        {gradedCredits === 0
                           ? "—"
-                          : cumulativeGPA.toFixed(2)}
+                          : termCumulativeGPA.toFixed(2)}
                       </td>
                     </tr>
                   );
@@ -339,7 +327,7 @@ export default function Home() {
         </section>
 
         {/* GPA Chart */}
-        <div className="mt-8">
+        <div className="mb-8">
           <GPAChart data={gpaChartData} />
         </div>
 

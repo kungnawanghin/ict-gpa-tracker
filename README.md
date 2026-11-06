@@ -2,6 +2,12 @@
 
 เว็บไซต์สำหรับช่วยนักศึกษา ICT มหาวิทยาลัยมหิดล ติดตามและคำนวณผลการเรียนของตนเอง
 
+## 🌐 เว็บไซต์
+
+สามารถเข้าใช้งานเว็บไซต์ได้ที่:
+
+**https://ict-gpa-tracker-v5l3.vercel.app**
+
 ## ฟีเจอร์หลัก
 
 - บันทึกเกรดของแต่ละรายวิชา
@@ -20,15 +26,16 @@
 - **TypeScript**
 - **Tailwind CSS**
 - **Supabase**
+- **Vercel**
 
 ## โครงสร้างโปรเจกต์
 
 ```text
 src/
-├── app/            # หน้าต่าง ๆ ของเว็บไซต์
-├── components/     # React Components
-├── lib/            # ฟังก์ชันสำหรับคำนวณ GPA และเชื่อมต่อฐานข้อมูล
-└── types/          # TypeScript Types
+├── app/           # หน้าต่าง ๆ ของเว็บไซต์
+├── components/    # React Components
+├── lib/           # ฟังก์ชันสำหรับคำนวณ GPA และเชื่อมต่อฐานข้อมูล
+└── types/         # TypeScript Types
 ```
 
 ## การทำงานของระบบ
@@ -66,7 +73,7 @@ npm install
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 ```
 
 ### 5. รันโปรเจกต์
@@ -75,7 +82,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 npm run dev
 ```
 
-จากนั้นเปิดเว็บไซต์ที่
+จากนั้นเปิดเว็บไซต์ที่:
 
 ```text
 http://localhost:3000

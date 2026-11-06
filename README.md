@@ -62,7 +62,7 @@ npm install
 
 ### 4. ตั้งค่า Environment Variables
 
-สร้างไฟล์ `.env.local` และเพิ่มข้อมูล Supabase ของคุณ
+สร้างไฟล์ `.env.local` และเพิ่มข้อมูล Supabase
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url

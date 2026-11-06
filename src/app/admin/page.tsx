@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { Course } from "@/types/course";
+import { Course, Semester } from "@/types/course";
 
 export default function AdminPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -15,7 +15,7 @@ export default function AdminPage() {
   const [name, setName] = useState("");
   const [credits, setCredits] = useState("");
   const [academicYear, setAcademicYear] = useState("");
-  const [semester, setSemester] = useState("1");
+  const [semester, setSemester] = useState<Semester>("1");
   const [countsForGPA, setCountsForGPA] = useState(true);
 
   // Course ที่กำลังแก้ไข
@@ -79,7 +79,7 @@ export default function AdminPage() {
       name: course.name,
       credits: Number(course.credits),
       academicYear: course.academic_year,
-      semester: course.semester,
+      semester: course.semester as Semester,
       countsForGPA: course.counts_for_gpa,
     }));
 
@@ -301,7 +301,9 @@ export default function AdminPage() {
               </label>
               <select
                 value={semester}
-                onChange={(event) => setSemester(event.target.value)}
+                onChange={(event) =>
+                  setSemester(event.target.value as Semester)
+                }
                 className="w-full rounded-lg border border-slate-300 px-3 py-2"
               >
                 <option value="1">1st Semester</option>
@@ -411,7 +413,7 @@ export default function AdminPage() {
                   onChange={(event) =>
                     setEditingCourse({
                       ...editingCourse,
-                      semester: event.target.value,
+                      semester: event.target.value as Semester,
                     })
                   }
                   className="w-full rounded-lg border border-slate-300 px-3 py-2"

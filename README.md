@@ -1,6 +1,6 @@
-# DST GPA Tracker
+# ict GPA Tracker
 
-เว็บไซต์สำหรับช่วยนักศึกษา DST มหาวิทยาลัยมหิดล ติดตามและคำนวณผลการเรียนของตนเอง
+เว็บไซต์สำหรับช่วยนักศึกษา ict มหาวิทยาลัยมหิดล ติดตามและคำนวณผลการเรียนของตนเอง
 
 ## 🌐 เว็บไซต์
 
@@ -52,13 +52,13 @@ src/
 ### 1. Clone โปรเจกต์
 
 ```bash
-git clone https://github.com/kungnawanghin/DST-gpa-tracker.git
+git clone https://github.com/kungnawanghin/ict-gpa-tracker.git
 ```
 
 ### 2. เข้าไปยังโฟลเดอร์โปรเจกต์
 
 ```bash
-cd DST-gpa-tracker
+cd ict-gpa-tracker
 ```
 
 ### 3. ติดตั้ง Dependencies

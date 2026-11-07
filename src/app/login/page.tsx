@@ -46,7 +46,7 @@ export default function LoginPage() {
         </h1>
 
         <p className="text-gray-400 mb-8">
-          ICT GPA Tracker
+          DST GPA Tracker
         </p>
 
         <form onSubmit={handleLogin} className="space-y-5">

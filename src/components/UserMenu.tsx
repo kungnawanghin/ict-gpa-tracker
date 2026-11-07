@@ -67,7 +67,7 @@ export default function UserMenu() {
         </p>
 
         <p className="text-xs text-slate-500">
-          {isAdmin ? "Administrator" : "ICT Student"}
+          {isAdmin ? "Administrator" : "DST Student"}
         </p>
       </div>
 

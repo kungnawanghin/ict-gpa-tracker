@@ -217,7 +217,7 @@ export default function AdminPage() {
             </h1>
 
             <p className="mt-2 text-slate-500">
-              Manage courses for ICT GPA Tracker
+              Manage courses for DST GPA Tracker
             </p>
           </div>
 

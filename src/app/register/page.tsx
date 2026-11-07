@@ -63,7 +63,7 @@ export default function RegisterPage() {
         </h1>
 
         <p className="text-gray-400 mb-8">
-          ICT GPA Tracker
+          DST GPA Tracker
         </p>
 
         <form onSubmit={handleRegister} className="space-y-5">

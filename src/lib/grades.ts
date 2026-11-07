@@ -57,7 +57,7 @@ export async function saveGrade(
         grade: grade,
       },
       {
-        onConflict: "user_id,course_code",
+        onConflDST: "user_id,course_code",
       }
     );
 

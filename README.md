@@ -1,12 +1,12 @@
-# ICT GPA Tracker
+# DST GPA Tracker
 
-เว็บไซต์สำหรับช่วยนักศึกษา ICT มหาวิทยาลัยมหิดล ติดตามและคำนวณผลการเรียนของตนเอง
+เว็บไซต์สำหรับช่วยนักศึกษา DST มหาวิทยาลัยมหิดล ติดตามและคำนวณผลการเรียนของตนเอง
 
 ## 🌐 เว็บไซต์
 
 สามารถเข้าใช้งานเว็บไซต์ได้ที่:
 
-**https://ict-gpa-tracker-v5l3.vercel.app**
+**https://ict-gpa-tracker-v5l3.vercel.app/**
 
 ## ฟีเจอร์หลัก
 
@@ -52,13 +52,13 @@ src/
 ### 1. Clone โปรเจกต์
 
 ```bash
-git clone https://github.com/kungnawanghin/ict-gpa-tracker.git
+git clone https://github.com/kungnawanghin/DST-gpa-tracker.git
 ```
 
 ### 2. เข้าไปยังโฟลเดอร์โปรเจกต์
 
 ```bash
-cd ict-gpa-tracker
+cd DST-gpa-tracker
 ```
 
 ### 3. ติดตั้ง Dependencies
